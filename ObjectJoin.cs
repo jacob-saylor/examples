@@ -63,16 +63,20 @@ namespace ConsoleSandbox.Helpers
         /// <param name="value">The value to assign to the object's property</param>
         private static void SetObjectProperty(ref object obj, string propertyName, object value)
         {
-            PropertyInfo propertyInfo = obj.GetType().GetProperty(propertyName);
+            PropertyInfo propertyInfo = obj.GetType().GetProperty(propertyName);            
             if (propertyInfo != null && value != null && propertyInfo.GetSetMethod() != null)
             {
                 try
                 {
-                    propertyInfo.SetValue(obj, value);
+                    if (value.GetType().GetInterface("IConvertible") != null)
+                    {
+                        value = value.GetType().FullName == propertyInfo.PropertyType.FullName ? value : Convert.ChangeType(value, propertyInfo.PropertyType);
+                        propertyInfo.SetValue(obj, value);
+                    }
                 }
                 catch
                 {
-                    throw new Exception(string.Format("An error occured when attempting to set the value of {0} of type {1}",propertyName,obj.ToString()));
+                    throw new Exception(string.Format("An error occurred when attempting to set the value of {0} of type {1}", propertyName, obj.ToString()));
                 }
             }
         }
